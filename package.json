@@ -1,7 +1,7 @@
 {
-  "name": "@fika/gatsby-source-cockpit",
+  "name": "occamy-gatsby-source-cockpit",
   "version": "1.1.2",
-  "description": "This is a Gatsby version 2.x.x source plugin that feeds the GraphQL tree with Cockpit Headless CMS collections and singletons data. Actually, it supports querying raw texts (and any trivial field types), Markdown, images, galleries, assets, sets, repeaters, layout(-grid)s (currently only without nested images/assets), objects, linked collections and internationalization.",
+  "description": "This is a Gatsby version 5.x.x source plugin that feeds the GraphQL tree with Cockpit Headless CMS collections and singletons data. Actually, it supports querying raw texts (and any trivial field types), Markdown, images, galleries, assets, sets, repeaters, layout(-grid)s (currently only without nested images/assets), objects, linked collections and internationalization.",
   "main": "gatsby-node.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -11,18 +11,20 @@
     "gatsby-plugin",
     "gatsby-source-plugin",
     "cockpit",
+    "cockpit-cms",
     "headless-cms",
     "fika",
+    "occamy",
     "productions"
   ],
-  "author": "Fika Productions <info@fikaproductions.com>",
+  "author": "Fika Productions <info@fikaproductions.com>, Occamy s.r.o. <info@occamy.cz>",
   "license": "GPL-3.0-or-later",
   "repository": {
     "type": "git",
-    "url": "https://github.com/fikaproductions/fika-gatsby-source-cockpit.git"
+    "url": "https://github.com/JunekCZ/occamy-gatsby-source-cockpit"
   },
   "bugs": {
-    "url": "https://github.com/fikaproductions/fika-gatsby-source-cockpit/issues"
+    "url": "https://github.com/JunekCZ/occamy-gatsby-source-cockpit/issues"
   },
   "husky": {
     "hooks": {
@@ -35,10 +37,10 @@
       "git add"
     ]
   },
-  "homepage": "https://github.com/fikaproductions/fika-gatsby-source-cockpit",
+  "homepage": "https://github.com/JunekCZ/occamy-gatsby-source-cockpit",
   "dependencies": {
     "gatsby-node-helpers": "^0.3.0",
-    "gatsby-source-filesystem": "^2.0.5",
+    "gatsby-source-filesystem": "^5.10.0",
     "mime": "^2.3.1",
     "request": "^2.88.0",
     "request-promise": "^4.2.2",
@@ -54,8 +56,8 @@
     "prettier": "1.16.0"
   },
   "peerDependencies": {
-    "gatsby": "2.x",
-    "gatsby-source-filesystem": "2.x",
+    "gatsby": "5.x",
+    "gatsby-source-filesystem": "5.x",
     "react": ">16"
   }
 }

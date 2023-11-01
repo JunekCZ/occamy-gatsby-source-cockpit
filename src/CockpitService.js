@@ -29,7 +29,7 @@ module.exports = class CockpitService {
 
   async fetch(endpoint, method, lang = null) {
     return request({
-      uri: `${this.baseUrl}/api${endpoint}?token=${this.token}${
+      uri: `${this.baseUrl}/api${endpoint}?${
         lang ? `&lang=${lang}` : ''
       }`,
       method,
@@ -49,7 +49,7 @@ module.exports = class CockpitService {
 
   async validateToken() {
     try {
-      await this.fetch('/collections/listCollections', METHODS.GET)
+      await this.fetch('/system/healthcheck', METHODS.GET)
     } catch (error) {
       throw new Error('Token config parameter is invalid')
     }

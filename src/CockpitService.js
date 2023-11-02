@@ -169,26 +169,26 @@ module.exports = class CockpitService {
 
   normalizeNodeItemImages(item, existingImages) {
     getFieldsOfTypes(item, ['image', 'gallery']).forEach((field) => {
-      if (!Array.isArray(field.value)) {
+      if (!Array.isArray(field)) {
         const imageField = field
-        let path = imageField.value.path
+        let path = imageField.path
 
         if (path == null) {
           return
         }
 
         if (path.startsWith('/')) {
-          path = `${this.baseUrl}${path}`
+          path = `${this.baseUrl}/storage/uploads${path}`
         } else if (!path.startsWith('http')) {
-          path = `${this.baseUrl}/${path}`
+          path = `${this.baseUrl}/storage/uploads/${path}`
         }
 
-        imageField.value = path
+        imageField.path = path
         existingImages[path] = null
       } else {
         const galleryField = field
 
-        galleryField.value.forEach((galleryImageField) => {
+        galleryField.forEach((galleryImageField) => {
           let path = galleryImageField.path
 
           if (path == null) {
@@ -198,19 +198,19 @@ module.exports = class CockpitService {
           trimGalleryImageField(galleryImageField)
 
           if (path.startsWith('/')) {
-            path = `${this.baseUrl}${path}`
+            path = `${this.baseUrl}/storage/uploads${path}`
           } else if (!path.startsWith('http')) {
-            path = `${this.baseUrl}/${path}`
+            path = `${this.baseUrl}/storage/uploads/${path}`
           }
 
-          galleryImageField.value = path
+          galleryImageField.path = path
           existingImages[path] = null
         })
       }
     })
 
-    if (Array.isArray(item.children)) {
-      item.children.forEach((child) => {
+    if (Array.isArray(item._children)) {
+      item._children.forEach((child) => {
         this.normalizeNodeItemImages(child, existingImages)
       })
     }
@@ -314,8 +314,8 @@ const trimAssetField = (assetField) => {
 const trimGalleryImageField = (galleryImageField) => {
   galleryImageField.type = 'image'
 
-  delete galleryImageField.meta.asset
-  delete galleryImageField.path
+  if (galleryImageField.meta) delete galleryImageField.meta.asset
+  if (galleryImageField.path) delete galleryImageField.path
 }
 
 const createCollectionItem = (
@@ -414,15 +414,7 @@ const createNodeField = (nodeType, nodeName, nodeFieldValue, nodeFieldSlug) => {
     nodeFieldValue != null &&
     nodeFieldValue !== ''
   ) {
-    if (!(nodeFieldValue instanceof Object)) {
-      return nodeFieldValue
-    }
-
-    const itemField = {
-      value: nodeFieldValue,
-    }
-
-    return itemField
+    return nodeFieldValue
   }
 
   return null

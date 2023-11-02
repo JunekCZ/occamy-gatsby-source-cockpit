@@ -6,23 +6,28 @@ const { generateNodeId } = require('gatsby-node-helpers').default({
 
 function getFieldsOfTypes(item, types) {
   const fieldsOfTypes = Object.keys(item)
-    .filter(
-      fieldName => item[fieldName] && types.includes(item[fieldName].type)
-    )
-    .map(fieldName => item[fieldName])
-
-  // process fields nested in set
-  Object.keys(item)
-    .filter(fieldName => item[fieldName] && item[fieldName].type === 'set')
-    .forEach(fieldName => {
-      fieldsOfTypes.push(...getFieldsOfTypes(item[fieldName].value, types))
+    .filter((fieldName) => {
+      if (!item[fieldName]) return false
+      if (!Array.isArray(item[fieldName]))
+        return types.includes(item[fieldName].type)
+      return item[fieldName].some((field) => types.includes(field.type))
     })
+    .map((fieldName) => item[fieldName])
+
+  // process nested fields
+  if (item._children) {
+    item._children.forEach((child) => {
+      fieldsOfTypes.push(...getFieldsOfTypes(child, types))
+    })
+  }
 
   // process fields nested in repeater
   Object.keys(item)
-    .filter(fieldName => item[fieldName] && item[fieldName].type === 'repeater')
-    .forEach(fieldName => {
-      item[fieldName].value.forEach(repeaterEntry => {
+    .filter(
+      (fieldName) => item[fieldName] && item[fieldName].type === 'repeater'
+    )
+    .forEach((fieldName) => {
+      item[fieldName].value.forEach((repeaterEntry) => {
         fieldsOfTypes.push(
           ...getFieldsOfTypes({ repeater: repeaterEntry }, types)
         )
@@ -33,29 +38,40 @@ function getFieldsOfTypes(item, types) {
 }
 
 function linkImageFieldsToImageNodes(node, images) {
-  getFieldsOfTypes(node, ['image']).forEach(field => {
-    if (images[field.value] !== null) {
-      field.value___NODE = images[field.value].id
-      delete field.value
+  getFieldsOfTypes(node, ['image']).forEach((field) => {
+    if (!Array.isArray(field)) {
+      if (images[field.path] !== null) {
+        field.value___NODE = images[field.path].id
+        delete field.path
+      } else {
+        field.path = null
+      }
     } else {
-      field.value = null
+      field.forEach((imageField) => {
+        if (images[imageField.path] !== null) {
+          imageField.value___NODE = images[imageField.path].id
+          delete imageField.path
+        } else {
+          imageField.path = null
+        }
+      })
     }
   })
 
-  getFieldsOfTypes(node, ['gallery']).forEach(field => {
+  getFieldsOfTypes(node, ['gallery']).forEach((field) => {
     if (Array.isArray(field.value)) {
       field.value___NODE = field.value
-        .map(imageField =>
+        .map((imageField) =>
           images[imageField.value] !== null ? images[imageField.value].id : null
         )
-        .filter(imageId => imageId != null)
+        .filter((imageId) => imageId != null)
     }
     delete field.value
   })
 }
 
 function linkAssetFieldsToAssetNodes(node, assets) {
-  getFieldsOfTypes(node, ['asset']).forEach(field => {
+  getFieldsOfTypes(node, ['asset']).forEach((field) => {
     if (assets[field.value]) {
       field.value___NODE = assets[field.value].id
       delete field.value
@@ -66,7 +82,7 @@ function linkAssetFieldsToAssetNodes(node, assets) {
 }
 
 function createObjectNodes(node, objectNodeFactory) {
-  getFieldsOfTypes(node, ['object']).forEach(field => {
+  getFieldsOfTypes(node, ['object']).forEach((field) => {
     const objectNodeId = objectNodeFactory.create(field.value)
     field.value___NODE = objectNodeId
     delete field.value
@@ -74,14 +90,14 @@ function createObjectNodes(node, objectNodeFactory) {
 }
 
 function linkMarkdownFieldsToMarkdownNodes(node, markdowns) {
-  getFieldsOfTypes(node, ['markdown']).forEach(field => {
+  getFieldsOfTypes(node, ['markdown']).forEach((field) => {
     field.value___NODE = markdowns[field.value].id
     delete field.value
   })
 }
 
 function linkLayoutFieldsToLayoutNodes(node, layouts) {
-  getFieldsOfTypes(node, ['layout', 'layout-grid']).forEach(field => {
+  getFieldsOfTypes(node, ['layout', 'layout-grid']).forEach((field) => {
     const layoutHash = hash(JSON.stringify(field.value))
     field.value___NODE = layouts[layoutHash].id
     delete field.value
@@ -89,11 +105,11 @@ function linkLayoutFieldsToLayoutNodes(node, layouts) {
 }
 
 function linkCollectionLinkFieldsToCollectionItemNodes(node) {
-  getFieldsOfTypes(node, ['collectionlink']).forEach(field => {
+  getFieldsOfTypes(node, ['collectionlink']).forEach((field) => {
     if (Array.isArray(field.value)) {
       const collectionName = field.value[0].link
 
-      field.value.forEach(linkedCollection => {
+      field.value.forEach((linkedCollection) => {
         if (linkedCollection.link !== collectionName) {
           throw new Error(
             `One to many Collection-Links must refer to entries from a single collection (concerned field: ${fieldName})`
@@ -101,7 +117,7 @@ function linkCollectionLinkFieldsToCollectionItemNodes(node) {
         }
       })
 
-      field.value___NODE = field.value.map(linkedCollection =>
+      field.value___NODE = field.value.map((linkedCollection) =>
         generateNodeId(
           linkedCollection.link,
           node.lang === 'any'

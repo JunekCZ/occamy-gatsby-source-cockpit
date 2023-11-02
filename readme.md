@@ -1,13 +1,13 @@
-# @fika/gatsby-source-cockpit
+# occamy-gatsby-source-cockpit
 
-This is a Gatsby version 2.\*.\* source plugin that feeds the GraphQL tree with Cockpit Headless CMS collections and singletons data.
+This is a Gatsby version 5.\*.\* source plugin that feeds the GraphQL tree with Cockpit Headless CMS collections and trees data (singletons are fetched like collections).
 
 Actually, it supports querying raw texts (and any trivial field types), Markdown, images, galleries, assets, sets, repeaters, layout(-grid)s (currently only without nested images/assets), objects, linked collections and internationalization.
 
 ## Installation
 
 ```
-npm install --save @fika/gatsby-source-cockpit
+npm install --save occamy-gatsby-source-cockpit
 ```
 
 This project has `gatsby-source-filesystem`, `gatsby` and `react` as peer dependencies, don't forget to install them as well.
@@ -18,11 +18,11 @@ npm install --save gatsby-source-filesystem gatsby react
 
 ## Contributing
 
-1. Fork main project on github [here](https://github.com/fikaproductions/fika-gatsby-source-cockpit).
+1. Fork main project on github [here](https://github.com/junekcz/occamy-gatsby-source-cockpit).
 2. Clone your fork.
 3. Create a new branch on your local fork.
 4. Commit and push your changes on this branch.
-5. Create a pull request on the main project by going [here](https://github.com/fikaproductions/fika-gatsby-source-cockpit/compare), click on "compare across forks" and select your own branch in the "head fork" section.
+5. Create a pull request on the main project by going [here](https://github.com/junekcz/occamy-gatsby-source-cockpit/compare), click on "compare across forks" and select your own branch in the "head fork" section.
 6. Compare changes and submit pull request.
 
 ### Tips and tricks
@@ -66,23 +66,12 @@ plugins: [
   {
     resolve: '@fika/gatsby-source-cockpit',
     options: {
-      token: 'YOUR_COCKPIT_API_TOKEN',
+      token: 'YOUR_COCKPIT_API_TOKEN', (1)
       baseUrl:
-        'YOUR_COCKPIT_API_BASE_URL', // (1)
-      locales: ['EVERY_LANGUAGE_KEYS_DEFINED_IN_YOUR_COCKPIT_CONFIGURATION'], // (2)
+        'YOUR_COCKPIT_API_BASE_URL', // (2)
       collections: [], // (3)
-      singletons: [], // (4)
-      aliases: {
-        collection: {
-          A_COLLECTION_NAME: 'AN_ALIAS',
-          …
-        },
-        singleton: {
-          A_SINGLETON_NAME: 'AN_ALIAS',
-          …
-        }
-      }, // (5)
-      brokenImageReplacement: 'AN_URL_TO_AN_IMAGE', // (6)
+      trees: [], // (4)
+      brokenImageReplacement: 'AN_URL_TO_AN_IMAGE', // (5)
     },
   },
 ]
@@ -90,13 +79,12 @@ plugins: [
 
 Notes:
 
-1. E.g. `'http://localhost:8080'`.
-2. E.g. `['en', 'fr']`.
+1. Private key generated in the cockpit cms.
+2. E.g. `https://www.example.com` - without the /api.
 3. The specific Cockpit collections you want to fetch. If empty or null all collections will be fetched. E.g. `['Products', 'Menu']`
-4. Same as the `collections` parameter, but for the Cockpit singletons.
-5. You can specify aliases for any Cockpit collection or singleton. Since it's not possible to have two GraphQL types with the same name in a schema, you can use this configuration to alias for instance a collection and a singleton sharing the same name (or with a difference of capitalization in the first character).  
+4. Same as the `collections` parameter, but for the Cockpit trees.
    E.g. (for a singleton and a collection both named 'Team') `{ collection: { Team: 'Teams' } }`.
-6. Replacement for broken image links. If `null`, the detected broken images will be removed. If an URL to an image, the broken image will be replaced with this image.
+5. Replacement for broken image links. If `null`, the detected broken images will be removed. If an URL to an image, the broken image will be replaced with this image.
 
 Adding the `gatsby-source-filesystem` dependency to your project grants access to the `publicURL` field resolver attribute on the file nodes that this plugin generates by extending the GraphQL type of the file nodes. So, as you can guess, the path specified in the plugin options could be anything, we do not need it to load any local files, we are just taking advantage of its extension of the file node type.
 
@@ -116,10 +104,6 @@ Collections and singletons are converted into nodes. You can access many collect
         cockpitModified // (3)
         cockpitBy // (3)
         cockpitModifiedBy // (3)
-        TeamMember1
-        TeamMember2
-        TeamMember3
-        childrenCockpitTeam { ... } // (4)
       }
     }
   }
@@ -224,7 +208,7 @@ Notes:
 
 #### Images and galleries
 
-Image and gallery fields nested within a collection or singleton will be downloaded and will get one or more file(s) node(s) attached under the `value` attribute like this:
+Image and gallery fields nested within a collection or tree will be downloaded and will get one or more file(s) node(s) attached under the `value` attribute like this:
 
 (You can then access the child(ren) node(s) a plugin like `gatsby-transformer-sharp` would create.)
 

@@ -10,7 +10,6 @@ const {
 } = require('./constants')
 const { default: axios } = require('axios')
 const getFieldsOfTypes = require('./helpers.js').getFieldsOfTypes
-var nodes = []
 
 module.exports = class CockpitService {
   constructor(
@@ -58,14 +57,6 @@ module.exports = class CockpitService {
       throw new Error(
         'BaseUrl config parameter is invalid or there is no internet connection'
       )
-    }
-  }
-
-  async validateToken() {
-    try {
-      await this.fetch('/system/healthcheck', METHODS.GET)
-    } catch (error) {
-      throw new Error('Token config parameter is invalid')
     }
   }
 

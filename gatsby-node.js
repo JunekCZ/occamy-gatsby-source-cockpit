@@ -36,7 +36,6 @@ exports.sourceNodes = async (
   const layoutNodeFactory = new LayoutNodeFactory(createNode)
 
   await cockpit.validateBaseUrl()
-  await cockpit.validateToken()
 
   const collections = await cockpit.getCollections()
   const trees = await cockpit.getTrees()

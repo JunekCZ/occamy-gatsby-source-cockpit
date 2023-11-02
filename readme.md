@@ -1,5 +1,7 @@
 # occamy-gatsby-source-cockpit
 
+This plugin works like an update of the [@fika/gatsby-source-cockpit](https://www.npmjs.com/package/@fika/gatsby-source-cockpit). I just wanted to use cockpit cms with gatsby and no plugin was updated. Thats how this repo has been founded.
+
 This is a Gatsby version 5.\*.\* source plugin that feeds the GraphQL tree with Cockpit Headless CMS collections and trees data (singletons are fetched like collections).
 
 Actually, it supports querying raw texts (and any trivial field types), Markdown, images, galleries, assets, sets, repeaters, layout(-grid)s (currently only without nested images/assets), objects, linked collections and internationalization.

@@ -14,8 +14,8 @@
     "cockpit-cms",
     "headless-cms",
     "fika",
-    "occamy",
-    "productions"
+    "productions",
+    "occamy"
   ],
   "author": "Fika Productions <info@fikaproductions.com>, Occamy s.r.o. <info@occamy.cz>",
   "license": "GPL-3.0-or-later",

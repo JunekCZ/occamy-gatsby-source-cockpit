@@ -3,7 +3,6 @@ const path = require('path')
 
 const CockpitService = require('./src/CockpitService')
 const CollectionItemNodeFactory = require('./src/CollectionItemNodeFactory')
-const SingletonItemNodeFactory = require('./src/SingletonItemNodeFactory')
 const {
   MARKDOWN_IMAGE_REGEXP_GLOBAL,
   MARKDOWN_ASSET_REGEXP_GLOBAL,
@@ -24,7 +23,7 @@ exports.sourceNodes = async (
     configOptions.token,
     configOptions.locales,
     configOptions.collections,
-    configOptions.singletons,
+    configOptions.trees,
     configOptions.aliases
   )
   const fileNodeFactory = new FileNodeFactory(
@@ -40,13 +39,13 @@ exports.sourceNodes = async (
   await cockpit.validateToken()
 
   const collections = await cockpit.getCollections()
-  const singletons = await cockpit.getSingletons()
-  validateNodeNames(collections, singletons)
+  const trees = await cockpit.getTrees()
 
-  const nodes = [...collections, ...singletons]
-  const { images, assets, markdowns, layouts } = cockpit.normalizeResources(
-    nodes
-  )
+  validateNodeNames(collections, trees)
+
+  const nodes = [...collections, ...trees]
+  const { images, assets, markdowns, layouts } =
+    cockpit.normalizeResources(nodes)
 
   cache.set(TYPE_PREFIX_COCKPIT, nodes)
 
@@ -90,7 +89,7 @@ exports.sourceNodes = async (
     layouts[layout] = { id }
   }
 
-  collections.forEach(collection => {
+  collections.forEach((collection) => {
     const nodeFactory = new CollectionItemNodeFactory(
       createNode,
       createParentChildLink,
@@ -101,22 +100,23 @@ exports.sourceNodes = async (
       layouts
     )
 
-    collection.items.forEach(item => {
+    collection.items.forEach((item) => {
       nodeFactory.create(item)
     })
   })
 
-  singletons.forEach(singleton => {
-    const nodeFactory = new SingletonItemNodeFactory(
+  trees.forEach((tree) => {
+    const nodeFactory = new CollectionItemNodeFactory(
       createNode,
-      singleton.name,
+      createParentChildLink,
+      tree.name,
       images,
       assets,
       markdowns,
       layouts
     )
 
-    singleton.items.forEach(item => {
+    tree.items.forEach((item) => {
       nodeFactory.create(item)
     })
   })
@@ -168,17 +168,17 @@ const createBrokenImagePlaceholder = async (
   return null
 }
 
-const validateNodeNames = (collections, singletons) => {
+const validateNodeNames = (collections, trees) => {
   const collisions = Object.values(
     collections
-      .map(collection => ({
+      .map((collection) => ({
         type: 'collection',
         name: collection.name,
       }))
       .concat(
-        singletons.map(singleton => ({
-          type: 'singleton',
-          name: singleton.name,
+        trees.map((tree) => ({
+          type: 'tree',
+          name: tree.name,
         }))
       )
       .reduce((accumulator, node) => {
@@ -193,8 +193,8 @@ const validateNodeNames = (collections, singletons) => {
         return accumulator
       }, {})
   )
-    .filter(association => association.length > 1)
-    .map(association =>
+    .filter((association) => association.length > 1)
+    .map((association) =>
       association.reduce(
         (accumulator, node) =>
           accumulator +
@@ -206,19 +206,19 @@ const validateNodeNames = (collections, singletons) => {
 
   if (collisions.length > 0) {
     throw new Error(
-      `Some collections or singletons names are colliding,
+      `Some collections or tree names are colliding,
        you must provide aliases for some of them in the plugin's configuration.` +
         '\n' +
-        `An example for a collection and a singleton both named "team" would be:
+        `An example for a collection and a tree both named "team" would be:
         options: {
           …
           aliases: {
-            singleton: {
-              team: 'Team', // 'team' would be valid too
-            },
             collection: {
               team: 'Teams', // 'teams' would be valid too
             }
+            tree: {
+              team: 'Team', // 'team' would be valid too
+            },
           }
         }` +
         '\n' +

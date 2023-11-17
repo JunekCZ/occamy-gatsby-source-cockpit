@@ -23,6 +23,7 @@ exports.sourceNodes = async (
     configOptions.token,
     configOptions.locales,
     configOptions.collections,
+    configOptions.singletons,
     configOptions.trees,
     configOptions.aliases
   )
@@ -38,11 +39,12 @@ exports.sourceNodes = async (
   await cockpit.validateBaseUrl()
 
   const collections = await cockpit.getCollections()
+  const singletons = await cockpit.getSingletons()
   const trees = await cockpit.getTrees()
 
-  validateNodeNames(collections, trees)
+  validateNodeNames(collections, singletons, trees)
 
-  const nodes = [...collections, ...trees]
+  const nodes = [...collections, ...singletons, ...trees]
   const { images, assets, markdowns, layouts } =
     cockpit.normalizeResources(nodes)
 
@@ -100,6 +102,22 @@ exports.sourceNodes = async (
     )
 
     collection.items.forEach((item) => {
+      nodeFactory.create(item)
+    })
+  })
+
+  singletons.forEach((singleton) => {
+    const nodeFactory = new CollectionItemNodeFactory(
+      createNode,
+      createParentChildLink,
+      singleton.name,
+      images,
+      assets,
+      markdowns,
+      layouts
+    )
+
+    singleton.items.forEach((item) => {
       nodeFactory.create(item)
     })
   })
@@ -167,13 +185,19 @@ const createBrokenImagePlaceholder = async (
   return null
 }
 
-const validateNodeNames = (collections, trees) => {
+const validateNodeNames = (collections, singletons, trees) => {
   const collisions = Object.values(
     collections
       .map((collection) => ({
         type: 'collection',
         name: collection.name,
       }))
+      .concat(
+        singletons.map((singleton) => ({
+          type: 'singleton',
+          name: singleton.name,
+        }))
+      )
       .concat(
         trees.map((tree) => ({
           type: 'tree',
@@ -205,7 +229,7 @@ const validateNodeNames = (collections, trees) => {
 
   if (collisions.length > 0) {
     throw new Error(
-      `Some collections or tree names are colliding,
+      `Some collections, singletons or tree names are colliding,
        you must provide aliases for some of them in the plugin's configuration.` +
         '\n' +
         `An example for a collection and a tree both named "team" would be:

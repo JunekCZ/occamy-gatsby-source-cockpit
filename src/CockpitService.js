@@ -1,6 +1,4 @@
 const mime = require('mime')
-const request = require('request-promise')
-const slugify = require('slugify')
 const hash = require('string-hash')
 
 const {
@@ -17,6 +15,7 @@ module.exports = class CockpitService {
     token,
     locales,
     collections,
+    singletons,
     trees,
     whiteListedCollectionNames = [],
     whiteListedSingletonNames = [],
@@ -26,6 +25,7 @@ module.exports = class CockpitService {
     this.token = token
     this.locales = locales
     this.collections = collections
+    this.singletons = singletons
     this.trees = trees
     this.whiteListedCollectionNames = whiteListedCollectionNames
     this.whiteListedSingletonNames = whiteListedSingletonNames
@@ -88,10 +88,16 @@ module.exports = class CockpitService {
       )
     }*/
 
-    const officialName =
-      (this.aliases['collection'] && this.aliases['collection'][name]) || name
+    return { items: collectionItems, name: name }
+  }
 
-    return { items: collectionItems, name: officialName }
+  async getSingleton(name) {
+    const singleton = await this.fetch(`/content/item/${name}`, METHODS.GET)
+    const singletonItem = [
+      createCollectionItem(name, Object.entries(singleton), singleton),
+    ]
+
+    return { items: singletonItem, name: name }
   }
 
   async getTree(name) {
@@ -124,6 +130,13 @@ module.exports = class CockpitService {
     if (!names || names.length === 0) return
 
     return Promise.all(names.map((name) => this.getCollection(name)))
+  }
+
+  async getSingletons() {
+    const names = this.singletons
+    if (!names || names.length === 0) return
+
+    return Promise.all(names.map((name) => this.getSingleton(name)))
   }
 
   async getTrees() {

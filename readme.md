@@ -36,7 +36,7 @@ While developing a GatsbyJS source plugin, it is useful to have a GatsbyJS proje
 npm link
 
 // In the GatsbyJS project's folder
-npm link @fika/gatsby-source-cockpit
+npm link occamy-gatsby-source-cockpit
 ```
 
 You'll have to install the plugin's peer dependencies in the plugin's folder as well (without saving them):
@@ -48,7 +48,7 @@ npm install --no-save gatsby react
 Then, in order to unlink the local plugin and use the one from NPM again:
 
 ```
-npm uninstall --no-save @fika/gatsby-source-cockpit
+npm uninstall --no-save occamy-gatsby-source-cockpit
 npm install
 ```
 
@@ -72,8 +72,9 @@ plugins: [
       baseUrl:
         'YOUR_COCKPIT_API_BASE_URL', // (2)
       collections: [], // (3)
-      trees: [], // (4)
-      brokenImageReplacement: 'AN_URL_TO_AN_IMAGE', // (5)
+      singletons: [], // (4)
+      trees: [], // (5)
+      brokenImageReplacement: 'AN_URL_TO_AN_IMAGE', // (6)
     },
   },
 ]
@@ -84,9 +85,9 @@ Notes:
 1. Private key generated in the cockpit cms.
 2. E.g. `https://www.example.com` - without the /api.
 3. The specific Cockpit collections you want to fetch. If empty or null all collections will be fetched. E.g. `['Products', 'Menu']`
-4. Same as the `collections` parameter, but for the Cockpit trees.
-   E.g. (for a singleton and a collection both named 'Team') `{ collection: { Team: 'Teams' } }`.
-5. Replacement for broken image links. If `null`, the detected broken images will be removed. If an URL to an image, the broken image will be replaced with this image.
+4. Same as the `collections` parameter, but for the Cockpit singletons.
+5. Same as the `collections` parameter, but for the Cockpit trees.
+6. Replacement for broken image links. If `null`, the detected broken images will be removed. If an URL to an image, the broken image will be replaced with this image.
 
 Adding the `gatsby-source-filesystem` dependency to your project grants access to the `publicURL` field resolver attribute on the file nodes that this plugin generates by extending the GraphQL type of the file nodes. So, as you can guess, the path specified in the plugin options could be anything, we do not need it to load any local files, we are just taking advantage of its extension of the file node type.
 

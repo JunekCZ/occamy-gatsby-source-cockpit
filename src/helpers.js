@@ -14,25 +14,21 @@ function getFieldsOfTypes(item, types) {
     })
     .map((fieldName) => item[fieldName])
 
-  // process nested fields
+  // process children
   if (item._children) {
     item._children.forEach((child) => {
       fieldsOfTypes.push(...getFieldsOfTypes(child, types))
     })
   }
 
-  // process fields nested in repeater
-  Object.keys(item)
-    .filter(
-      (fieldName) => item[fieldName] && item[fieldName].type === 'repeater'
-    )
-    .forEach((fieldName) => {
-      item[fieldName].value.forEach((repeaterEntry) => {
-        fieldsOfTypes.push(
-          ...getFieldsOfTypes({ repeater: repeaterEntry }, types)
-        )
+  // process nested fields
+  Object.keys(item).forEach((fieldName) => {
+    if (Array.isArray(item[fieldName])) {
+      item[fieldName].forEach((field) => {
+        fieldsOfTypes.push(...getFieldsOfTypes(field, types))
       })
-    })
+    }
+  })
 
   return fieldsOfTypes
 }
@@ -48,7 +44,10 @@ function linkImageFieldsToImageNodes(node, images) {
       }
     } else {
       field.forEach((imageField) => {
-        if (images[imageField.path] !== null) {
+        if (
+          images[imageField.path] !== undefined &&
+          images[imageField.path] !== null
+        ) {
           imageField.value___NODE = images[imageField.path].id
           delete imageField.path
         } else {

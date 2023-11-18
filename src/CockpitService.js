@@ -208,7 +208,7 @@ module.exports = class CockpitService {
             return
           }
 
-          trimGalleryImageField(galleryImageField)
+          //trimGalleryImageField(galleryImageField)
 
           if (path.startsWith('/')) {
             path = `${this.baseUrl}/storage/uploads${path}`

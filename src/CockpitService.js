@@ -127,21 +127,21 @@ module.exports = class CockpitService {
 
   async getCollections() {
     const names = this.collections
-    if (!names || names.length === 0) return
+    if (!names || names.length === 0) return []
 
     return Promise.all(names.map((name) => this.getCollection(name)))
   }
 
   async getSingletons() {
     const names = this.singletons
-    if (!names || names.length === 0) return
+    if (!names || names.length === 0) return []
 
     return Promise.all(names.map((name) => this.getSingleton(name)))
   }
 
   async getTrees() {
     const names = this.trees
-    if (!names || names.length === 0) return
+    if (!names || names.length === 0) return []
 
     return Promise.all(names.map((name) => this.getTree(name)))
   }
